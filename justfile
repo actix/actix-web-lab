@@ -3,6 +3,18 @@ import '.toolchain/rust.just'
 _list:
     @just --list
 
+# Update the Actions lockfile after changing workflow dependencies.
+actions-lock:
+    gh actions-lock
+
+# Verify Actions lockfile coverage without network access.
+check-actions-lock:
+    gh actions-lock --verify-local
+
+# Show votes for open feature polls.
+poll-results:
+    @./poll-results.sh
+
 # Validate benchmark outputs without collecting timings.
 [group("benchmark")]
 bench-test:
@@ -28,6 +40,10 @@ bench-build-walltime *args:
 [group("benchmark")]
 bench-run-walltime *args:
     codspeed run -m walltime -- cargo codspeed run -m walltime {{ args }}
+
+# Check security advisories.
+check-advisories:
+    cargo deny --log-level warn --workspace --all-features check advisories
 
 # Check project formatting.
 check: && clippy
