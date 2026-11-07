@@ -34,6 +34,7 @@
             pkgs.jq
             pkgs.just
             pkgs.prettier
+            pkgs.qsv
             pkgs.openssl
             pkgs.pkg-config
             pkgs.taplo

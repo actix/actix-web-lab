@@ -1,24 +1,17 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -euo pipefail
 
-F="$(mktemp)"
-
-HAS_XSV="$(command -v xsv)"
-# HAS_XSV=""
-
-if [ ! "$(command -v gh)" ]; then
-    echo "This script requires the GitHub CLI."
-    echo "https://cli.github.com"
+if ! command -v gh >/dev/null 2>&1; then
+    echo "This script requires the GitHub CLI." >&2
+    echo "https://cli.github.com" >&2
     exit 1
 fi
 
+F="$(mktemp)"
+trap 'rm -f "$F"' EXIT
 
-if [ "$HAS_XSV" ]; then
-    echo 'votes,feature,"issue url"' >> "$F"
-else
-    echo "votes \tfeature \tissue url" >> "$F"
-fi
+printf 'votes,feature,"issue url"\n' > "$F"
 
 gh issue list \
     --repo="actix/actix-web-lab" \
@@ -27,17 +20,12 @@ gh issue list \
     --json="title,url,reactionGroups" \
     --jq '
         .[]
-        | {
-            title,
-            url,
-            votes: ((.reactionGroups[]? | select(.content == "THUMBS_UP") | .users.totalCount) // 0)
-        }
-        | "\(.votes),\"\(.title)\",\(.url)"
-        ' \
-    | sed -E 's/(.*)\[poll\] (.*)/\1\2/' >> "$F"
+        | [
+            ((.reactionGroups[]? | select(.content == "THUMBS_UP") | .users.totalCount) // 0),
+            (.title | sub("^\\[poll\\] "; "")),
+            .url
+        ]
+        | @csv
+        ' >> "$F"
 
-if [ "$HAS_XSV" ]; then
-    cat "$F" | xsv table
-else
-    cat "$F" | awk -F "\"*,\"*" '{ print $1 "\t" $2 "\t" $3 }'
-fi
+qsv table < "$F"

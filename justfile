@@ -3,6 +3,10 @@ import '.toolchain/rust.just'
 _list:
     @just --list
 
+# Show votes for open feature polls.
+poll-results:
+    @./poll-results.sh
+
 # Validate benchmark outputs without collecting timings.
 [group("benchmark")]
 bench-test:
