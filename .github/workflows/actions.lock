@@ -5,9 +5,9 @@ version: 'v0.0.3'
 workflows:
     '.github/workflows/benchmark.yml':
         - 'actions-rust-lang/setup-rust-toolchain@v2.0.0'
+        - 'actions/checkout@v7.0.1'
         - 'codspeedhq/action@v5.6.3'
         - 'taiki-e/install-action@v2.90.1'
-        - 'useblacksmith/checkout@v1.8.2'
     '.github/workflows/ci.yml':
         - 'actions-rust-lang/setup-rust-toolchain@v2.0.0'
         - 'nicknovitski/nix-develop@v1.2.1'
