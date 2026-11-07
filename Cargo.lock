@@ -74,8 +74,8 @@ dependencies = [
  "md-5",
  "md4",
  "pin-project-lite",
- "sha1",
- "sha2 0.10.9",
+ "sha1 0.10.7",
+ "sha2",
  "sha3",
  "subtle",
  "tracing",
@@ -112,7 +112,7 @@ dependencies = [
  "percent-encoding",
  "pin-project-lite",
  "rand 0.10.3",
- "sha1",
+ "sha1 0.11.0",
  "smallvec",
  "tokio",
  "tokio-util",
@@ -386,7 +386,7 @@ dependencies = [
  "serde_html_form",
  "serde_json",
  "serde_path_to_error",
- "sha2 0.11.0",
+ "sha2",
  "static_assertions",
  "time",
  "tokio",
@@ -1403,7 +1403,7 @@ checksum = "6ebaa1a2bf1290ab3bfe5a7b771d050ebffab2711c19a81691c683a5144a25de"
 dependencies = [
  "curve25519-dalek",
  "ed25519",
- "sha2 0.11.0",
+ "sha2",
  "subtle",
  "zeroize",
 ]
@@ -3353,6 +3353,17 @@ dependencies = [
 
 [[package]]
 name = "sha1"
+version = "0.10.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a978451301f4db1d02937a4ab3ccce137717b81826e79b7d49ffe3244a13c3b8"
+dependencies = [
+ "cfg-if",
+ "cpufeatures 0.2.17",
+ "digest 0.10.7",
+]
+
+[[package]]
+name = "sha1"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "aacc4cc499359472b4abe1bf11d0b12e688af9a805fa5e3016f9a386dc2d0214"
@@ -3360,17 +3371,6 @@ dependencies = [
  "cfg-if",
  "cpufeatures 0.3.0",
  "digest 0.11.3",
-]
-
-[[package]]
-name = "sha2"
-version = "0.10.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7507d819769d01a365ab707794a4084392c824f54a7a6a7862f8c3d0892b283"
-dependencies = [
- "cfg-if",
- "cpufeatures 0.2.17",
- "digest 0.10.7",
 ]
 
 [[package]]
