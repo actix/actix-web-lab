@@ -1,0 +1,27 @@
+A-client-ip-cloudflare:
+  - changed-files:
+      - any-glob-to-any-file: actix-client-ip-cloudflare/**
+
+A-hash:
+  - changed-files:
+      - any-glob-to-any-file: actix-hash/**
+
+A-web-lab:
+  - changed-files:
+      - any-glob-to-any-file: actix-web-lab/**
+
+A-web-lab-derive:
+  - changed-files:
+      - any-glob-to-any-file: actix-web-lab-derive/**
+
+A-proxy-protocol:
+  - changed-files:
+      - any-glob-to-any-file: actix-proxy-protocol/**
+
+A-proxyproto:
+  - changed-files:
+      - any-glob-to-any-file: proxyproto/**
+
+A-russe:
+  - changed-files:
+      - any-glob-to-any-file: russe/**
