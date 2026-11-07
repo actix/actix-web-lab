@@ -22,6 +22,9 @@ workflows:
         - 'nixbuild/nix-quick-install-action@v35'
         - 'taiki-e/install-action@v2.90.1'
         - 'useblacksmith/checkout@v1.8.2'
+    '.github/workflows/labeler.yml':
+        - 'actions/labeler@v7'
+        - 'useblacksmith/checkout@v1'
     '.github/workflows/lint.yml':
         - 'actions-rust-lang/setup-rust-toolchain@v2.0.0'
         - 'giraffate/clippy-action@v1.0.1'
@@ -72,6 +75,11 @@ dependencies:
         commit: 'sha1-ed597411d8f924073f98dfc5c65a23a2325f34cd'
         owner_id: 44036562
         repo_id: 205262760
+    'actions/labeler@v7':
+        ref: 'v7'
+        commit: 'sha1-bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13'
+        owner_id: 44036562
+        repo_id: 177139928
     'cargo-bins/cargo-binstall@851112458b5f28a29e5bc14a690c3f283d9dcc6f':
         ref: 'v1.26.2'
         commit: 'sha1-851112458b5f28a29e5bc14a690c3f283d9dcc6f'
@@ -163,6 +171,11 @@ dependencies:
         commit: 'sha1-c509219cf42fba86913069efd0ade2458c59337b'
         owner_id: 43724913
         repo_id: 442947557
+    'useblacksmith/checkout@v1':
+        ref: 'v1'
+        commit: 'sha1-2b9fe87d796feea153b455ec2f3125b471a7b0e7'
+        owner_id: 156274793
+        repo_id: 1107788336
     'useblacksmith/checkout@v1.8.2':
         ref: 'v1.8.2'
         commit: 'sha1-2b9fe87d796feea153b455ec2f3125b471a7b0e7'
