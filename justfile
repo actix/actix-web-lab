@@ -3,6 +3,14 @@ import '.toolchain/rust.just'
 _list:
     @just --list
 
+# Update the Actions lockfile after changing workflow dependencies.
+actions-lock:
+    gh actions-lock
+
+# Verify Actions lockfile coverage without network access.
+check-actions-lock:
+    gh actions-lock --verify-local
+
 # Show votes for open feature polls.
 poll-results:
     @./poll-results.sh

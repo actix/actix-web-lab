@@ -34,17 +34,17 @@ jobs:
     runs-on: blacksmith-2vcpu-ubuntu-2404
 
     steps:
-      - uses: useblacksmith/checkout@2b9fe87d796feea153b455ec2f3125b471a7b0e7 # v1
+      - uses: useblacksmith/checkout@v1.8.2
         with:
           persist-credentials: false
 
       - name: Setup mold linker
-        uses: rui314/setup-mold@da13e0b42e392e3a45d1215033a2270b849d7d36 # v1 # zizmor: ignore[ref-version-mismatch] v1 is a rolling tag; the SHA is intentionally pinned
+        uses: rui314/setup-mold@main
 
       - name: Install Rust (${{ matrix.version.name }})
         id: rust
         background: true
-        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
         env:
           LD_LIBRARY_PATH: ""
         with:
@@ -52,18 +52,18 @@ jobs:
           cache-key: ${{ hashFiles('flake.lock') }}
 
       - name: Install Nix
-        uses: nixbuild/nix-quick-install-action@9f63be77f412a248c9d9a65a4c82cf066cdf8f0c # v35
+        uses: nixbuild/nix-quick-install-action@v35
 
       - name: Enter Nix devshell
         id: devshell
         background: true
-        uses: nicknovitski/nix-develop@9be7cfb4b10451d3390a75dc18ad0465bed4932a # v1.2.1
+        uses: nicknovitski/nix-develop@v1.2.1
 
       - name: Wait for Rust
         wait: rust
 
       - name: Install just,cargo-hack,cargo-nextest,cargo-ci-cache-clean
-        uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
+        uses: taiki-e/install-action@v2.90.1
         env:
           LD_LIBRARY_PATH: ""
         with:
@@ -87,14 +87,14 @@ jobs:
     name: Documentation Tests
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
-      - uses: useblacksmith/checkout@2b9fe87d796feea153b455ec2f3125b471a7b0e7 # v1
+      - uses: useblacksmith/checkout@v1.8.2
         with:
           persist-credentials: false
 
       - name: Install Rust (nightly)
         id: rust
         background: true
-        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
         env:
           LD_LIBRARY_PATH: ""
         with:
@@ -102,18 +102,18 @@ jobs:
           cache-key: ${{ hashFiles('flake.lock') }}
 
       - name: Install Nix
-        uses: nixbuild/nix-quick-install-action@9f63be77f412a248c9d9a65a4c82cf066cdf8f0c # v35
+        uses: nixbuild/nix-quick-install-action@v35
 
       - name: Enter Nix devshell
         id: devshell
         background: true
-        uses: nicknovitski/nix-develop@9be7cfb4b10451d3390a75dc18ad0465bed4932a # v1.2.1
+        uses: nicknovitski/nix-develop@v1.2.1
 
       - name: Wait for Rust
         wait: rust
 
       - name: Install just
-        uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
+        uses: taiki-e/install-action@v2.90.1
         env:
           LD_LIBRARY_PATH: ""
         with:
@@ -129,15 +129,15 @@ jobs:
     name: Feature Combinations
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
-      - uses: useblacksmith/checkout@2b9fe87d796feea153b455ec2f3125b471a7b0e7 # v1
+      - uses: useblacksmith/checkout@v1.8.2
         with:
           persist-credentials: false
 
       - name: Install Rust (stable)
-        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
 
       - name: Install cargo-hack
-        uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
+        uses: taiki-e/install-action@v2.90.1
         with:
           tool: cargo-hack
 

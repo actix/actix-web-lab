@@ -20,17 +20,17 @@ jobs:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - name: Checkout
-        uses: useblacksmith/checkout@2b9fe87d796feea153b455ec2f3125b471a7b0e7 # v1
+        uses: useblacksmith/checkout@v1.8.2
         with:
           persist-credentials: false
 
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
         with:
           toolchain: nightly
 
       - name: Install cargo-codspeed
-        uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
+        uses: taiki-e/install-action@v2.90.1
         with:
           tool: cargo-codspeed
 
@@ -38,7 +38,7 @@ jobs:
         run: cargo codspeed build --all-features --locked -m simulation -m memory
 
       - name: Run CPU and memory benchmarks
-        uses: CodSpeedHQ/action@af75f77f17a054769abefaa42fe8dc2975469b5f # v5.6.3
+        uses: CodSpeedHQ/action@v5.6.3
         env:
           DIVAN_MIN_TIME: "1"
         with:
