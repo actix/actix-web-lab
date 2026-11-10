@@ -21,6 +21,10 @@ use serde::de::DeserializeOwned;
 /// This version also removes the custom error handler config; users should instead prefer to handle
 /// errors using the explicit `Result<Query<T>, E>` extractor in their handlers.
 ///
+/// Deserialization first runs without error-path tracking. On failure, it runs again
+/// over the same input to obtain a detailed error. Custom deserializers can run
+/// twice and must account for repeated side effects. A successful retry is accepted.
+///
 /// # Panics
 /// A query string consists of unordered `key=value` pairs, therefore it cannot be decoded into any
 /// type which depends upon data ordering (eg. tuples). Trying to do so will result in a panic.
@@ -89,10 +93,11 @@ impl<T: DeserializeOwned> Query<T> {
     /// assert!(numbers.get("three").is_none());
     /// ```
     pub fn from_query(query_str: &str) -> Result<Self, QueryDeserializeError> {
-        let parser = form_urlencoded::parse(query_str.as_bytes());
-        let de = serde_html_form::Deserializer::new(parser);
+        let make_deserializer =
+            || serde_html_form::Deserializer::new(form_urlencoded::parse(query_str.as_bytes()));
 
-        serde_path_to_error::deserialize(de)
+        T::deserialize(make_deserializer())
+            .or_else(|_| serde_path_to_error::deserialize(make_deserializer()))
             .map(Self)
             .map_err(|err| QueryDeserializeError {
                 path: err.path().clone(),

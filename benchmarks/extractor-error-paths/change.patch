@@ -1,0 +1,140 @@
+diff --git a/actix-web-lab/src/json.rs b/actix-web-lab/src/json.rs
+index 5fd4970..fc81ab2 100644
+--- a/actix-web-lab/src/json.rs
++++ b/actix-web-lab/src/json.rs
+@@ -27,6 +27,10 @@ pub const DEFAULT_JSON_LIMIT: usize = 2_097_152;
+ /// To extract typed data from a request body, the inner type `T` must implement the
+ /// [`serde::Deserialize`] trait.
+ ///
++/// Deserialization first runs without error-path tracking. On failure, it runs again
++/// over the same input to obtain a detailed error. Custom deserializers can run
++/// twice and must account for repeated side effects. A successful retry is accepted.
++///
+ /// Use the `LIMIT` const generic parameter to control the payload size limit. The default limit
+ /// that is exported (`DEFAULT_LIMIT`) is 2MiB.
+ ///
+@@ -245,14 +249,18 @@ impl<T: DeserializeOwned, const LIMIT: usize> Future for JsonBody<T, LIMIT> {
+ 
+                     None => {
+                         let mut de = serde_json::Deserializer::from_slice(buf);
+-                        let json = serde_path_to_error::deserialize(&mut de).map_err(|err| {
+-                            JsonPayloadError::Deserialize {
++                        // Keep the existing completion rules: do not require end of input.
++                        let json = T::deserialize(&mut de)
++                            .or_else(|_| {
++                                let mut de = serde_json::Deserializer::from_slice(buf);
++                                serde_path_to_error::deserialize(&mut de)
++                            })
++                            .map_err(|err| JsonPayloadError::Deserialize {
+                                 source: JsonDeserializeError {
+                                     path: err.path().clone(),
+                                     source: err.into_inner(),
+                                 },
+-                            }
+-                        })?;
++                            })?;
+ 
+                         return Poll::Ready(Ok(json));
+                     }
+diff --git a/actix-web-lab/src/query.rs b/actix-web-lab/src/query.rs
+index 2e3b4eb..0b3fd05 100644
+--- a/actix-web-lab/src/query.rs
++++ b/actix-web-lab/src/query.rs
+@@ -21,6 +21,10 @@ use serde::de::DeserializeOwned;
+ /// This version also removes the custom error handler config; users should instead prefer to handle
+ /// errors using the explicit `Result<Query<T>, E>` extractor in their handlers.
+ ///
++/// Deserialization first runs without error-path tracking. On failure, it runs again
++/// over the same input to obtain a detailed error. Custom deserializers can run
++/// twice and must account for repeated side effects. A successful retry is accepted.
++///
+ /// # Panics
+ /// A query string consists of unordered `key=value` pairs, therefore it cannot be decoded into any
+ /// type which depends upon data ordering (eg. tuples). Trying to do so will result in a panic.
+@@ -89,10 +93,11 @@ impl<T: DeserializeOwned> Query<T> {
+     /// assert!(numbers.get("three").is_none());
+     /// ```
+     pub fn from_query(query_str: &str) -> Result<Self, QueryDeserializeError> {
+-        let parser = form_urlencoded::parse(query_str.as_bytes());
+-        let de = serde_html_form::Deserializer::new(parser);
++        let make_deserializer =
++            || serde_html_form::Deserializer::new(form_urlencoded::parse(query_str.as_bytes()));
+ 
+-        serde_path_to_error::deserialize(de)
++        T::deserialize(make_deserializer())
++            .or_else(|_| serde_path_to_error::deserialize(make_deserializer()))
+             .map(Self)
+             .map_err(|err| QueryDeserializeError {
+                 path: err.path().clone(),
+diff --git a/actix-web-lab/src/url_encoded_form.rs b/actix-web-lab/src/url_encoded_form.rs
+index 3fdb443..1ada894 100644
+--- a/actix-web-lab/src/url_encoded_form.rs
++++ b/actix-web-lab/src/url_encoded_form.rs
+@@ -30,6 +30,10 @@ pub const DEFAULT_URL_ENCODED_FORM_LIMIT: usize = 2_097_152;
+ /// To extract typed data from a request body, the inner type `T` must implement the
+ /// [`serde::Deserialize`] trait.
+ ///
++/// Deserialization first runs without error-path tracking. On failure, it runs again
++/// over the same input to obtain a detailed error. Custom deserializers can run
++/// twice and must account for repeated side effects. A successful retry is accepted.
++///
+ /// Use the `LIMIT` const generic parameter to control the payload size limit. The default limit
+ /// that is exported (`DEFAULT_LIMIT`) is 2MiB.
+ ///
+@@ -232,14 +236,17 @@ impl<T: DeserializeOwned, const LIMIT: usize> Future for UrlEncodedFormBody<T, L
+                     None => {
+                         let de = serde_html_form::Deserializer::from_bytes(buf);
+ 
+-                        let form = serde_path_to_error::deserialize(de).map_err(|err| {
+-                            UrlEncodedFormError::Deserialize {
++                        let form = T::deserialize(de)
++                            .or_else(|_| {
++                                let de = serde_html_form::Deserializer::from_bytes(buf);
++                                serde_path_to_error::deserialize(de)
++                            })
++                            .map_err(|err| UrlEncodedFormError::Deserialize {
+                                 source: UrlEncodedFormDeserializeError {
+                                     path: err.path().clone(),
+                                     source: err.into_inner(),
+                                 },
+-                            }
+-                        })?;
++                            })?;
+ 
+                         return Poll::Ready(Ok(form));
+                     }
+@@ -509,4 +516,34 @@ mod tests {
+             "URL encoded payload is larger (9 bytes) than allowed (limit: 8 bytes).",
+         );
+     }
++
++    #[actix_web::test]
++    async fn deserialize_error_keeps_path_and_source() {
++        #[derive(Debug, Deserialize)]
++        struct Input {
++            #[serde(rename = "b")]
++            _value: bool,
++        }
++
++        let (req, mut payload) = TestRequest::default()
++            .insert_header(header::ContentType::form_url_encoded())
++            .set_payload("b=invalid")
++            .to_http_parts();
++        let err =
++            UrlEncodedFormBody::<Input, DEFAULT_URL_ENCODED_FORM_LIMIT>::new(&req, &mut payload)
++                .await
++                .unwrap_err();
++        let UrlEncodedFormError::Deserialize { source } = err else {
++            panic!()
++        };
++        assert_eq!(source.path().to_string(), "b");
++        assert_eq!(
++            source.to_string(),
++            "URL-encoded form deserialization failed at path: b"
++        );
++        assert_eq!(
++            source.source().to_string(),
++            r#"invalid value: string "invalid", expected "true", "on" or "false""#
++        );
++    }
+ }
