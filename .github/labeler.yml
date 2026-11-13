@@ -21,7 +21,3 @@ A-proxy-protocol:
 A-proxyproto:
   - changed-files:
       - any-glob-to-any-file: proxyproto/**
-
-A-russe:
-  - changed-files:
-      - any-glob-to-any-file: russe/**
