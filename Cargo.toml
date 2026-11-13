@@ -7,7 +7,6 @@ members = [
   "actix-web-lab",
   "actix-proxy-protocol",
   "proxyproto",
-  "russe",
 ]
 
 [workspace.package]
