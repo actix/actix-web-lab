@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.29.6
+
 - Add `sse::Data::{retry, set_retry}` methods to set the connection's reconnection delay in individual data messages.
 - Deprecate `body::{new_infallible_body_stream, new_infallible_sized_stream}` in favor of the upstream `actix_web::body::{BodyStream, SizedStream}::from_infallible()` constructors.
 
