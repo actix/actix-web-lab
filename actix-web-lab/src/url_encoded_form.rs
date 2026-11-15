@@ -30,6 +30,10 @@ pub const DEFAULT_URL_ENCODED_FORM_LIMIT: usize = 2_097_152;
 /// To extract typed data from a request body, the inner type `T` must implement the
 /// [`serde::Deserialize`] trait.
 ///
+/// Deserialization first runs without error-path tracking. On failure, it runs again
+/// over the same input to obtain a detailed error. Custom deserializers can run
+/// twice and must account for repeated side effects. A successful retry is accepted.
+///
 /// Use the `LIMIT` const generic parameter to control the payload size limit. The default limit
 /// that is exported (`DEFAULT_LIMIT`) is 2MiB.
 ///
@@ -232,14 +236,17 @@ impl<T: DeserializeOwned, const LIMIT: usize> Future for UrlEncodedFormBody<T, L
                     None => {
                         let de = serde_html_form::Deserializer::from_bytes(buf);
 
-                        let form = serde_path_to_error::deserialize(de).map_err(|err| {
-                            UrlEncodedFormError::Deserialize {
+                        let form = T::deserialize(de)
+                            .or_else(|_| {
+                                let de = serde_html_form::Deserializer::from_bytes(buf);
+                                serde_path_to_error::deserialize(de)
+                            })
+                            .map_err(|err| UrlEncodedFormError::Deserialize {
                                 source: UrlEncodedFormDeserializeError {
                                     path: err.path().clone(),
                                     source: err.into_inner(),
                                 },
-                            }
-                        })?;
+                            })?;
 
                         return Poll::Ready(Ok(form));
                     }
@@ -507,6 +514,36 @@ mod tests {
         assert_eq!(
             err_str,
             "URL encoded payload is larger (9 bytes) than allowed (limit: 8 bytes).",
+        );
+    }
+
+    #[actix_web::test]
+    async fn deserialize_error_keeps_path_and_source() {
+        #[derive(Debug, Deserialize)]
+        struct Input {
+            #[serde(rename = "b")]
+            _value: bool,
+        }
+
+        let (req, mut payload) = TestRequest::default()
+            .insert_header(header::ContentType::form_url_encoded())
+            .set_payload("b=invalid")
+            .to_http_parts();
+        let err =
+            UrlEncodedFormBody::<Input, DEFAULT_URL_ENCODED_FORM_LIMIT>::new(&req, &mut payload)
+                .await
+                .unwrap_err();
+        let UrlEncodedFormError::Deserialize { source } = err else {
+            panic!()
+        };
+        assert_eq!(source.path().to_string(), "b");
+        assert_eq!(
+            source.to_string(),
+            "URL-encoded form deserialization failed at path: b"
+        );
+        assert_eq!(
+            source.source().to_string(),
+            r#"invalid value: string "invalid", expected "true", "on" or "false""#
         );
     }
 }

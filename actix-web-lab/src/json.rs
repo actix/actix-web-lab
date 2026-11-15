@@ -27,6 +27,10 @@ pub const DEFAULT_JSON_LIMIT: usize = 2_097_152;
 /// To extract typed data from a request body, the inner type `T` must implement the
 /// [`serde::Deserialize`] trait.
 ///
+/// Deserialization first runs without error-path tracking. On failure, it runs again
+/// over the same input to obtain a detailed error. Custom deserializers can run
+/// twice and must account for repeated side effects. A successful retry is accepted.
+///
 /// Use the `LIMIT` const generic parameter to control the payload size limit. The default limit
 /// that is exported (`DEFAULT_LIMIT`) is 2MiB.
 ///
@@ -245,14 +249,18 @@ impl<T: DeserializeOwned, const LIMIT: usize> Future for JsonBody<T, LIMIT> {
 
                     None => {
                         let mut de = serde_json::Deserializer::from_slice(buf);
-                        let json = serde_path_to_error::deserialize(&mut de).map_err(|err| {
-                            JsonPayloadError::Deserialize {
+                        // Keep the existing completion rules: do not require end of input.
+                        let json = T::deserialize(&mut de)
+                            .or_else(|_| {
+                                let mut de = serde_json::Deserializer::from_slice(buf);
+                                serde_path_to_error::deserialize(&mut de)
+                            })
+                            .map_err(|err| JsonPayloadError::Deserialize {
                                 source: JsonDeserializeError {
                                     path: err.path().clone(),
                                     source: err.into_inner(),
                                 },
-                            }
-                        })?;
+                            })?;
 
                         return Poll::Ready(Ok(json));
                     }
