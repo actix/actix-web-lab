@@ -83,9 +83,9 @@ dependencies = [
 
 [[package]]
 name = "actix-http"
-version = "3.21.0"
+version = "3.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3422032be73eeb15bafdb64086386385875b653eb418a80241d1f98473e86ea6"
+checksum = "50f98f47b03911915aa3f0b856749aa3d3915033afabb295ab6ac5ff3b8bd5c1"
 dependencies = [
  "actix-codec",
  "actix-service",
@@ -228,6 +228,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "actix-sse"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e983426d429dcb0dbe873c1c66e0bcafb72bed52d7fd5e8f1f0ecde15844a2a"
+dependencies = [
+ "actix-http",
+ "actix-web",
+ "bytes",
+ "bytestring",
+ "futures-util",
+ "pin-project-lite",
+ "russe",
+ "tokio",
+ "tokio-stream",
+]
+
+[[package]]
 name = "actix-test"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -346,6 +363,7 @@ dependencies = [
  "actix-http",
  "actix-router",
  "actix-service",
+ "actix-sse",
  "actix-web",
  "actix-web-lab-derive",
  "ahash",
@@ -364,7 +382,6 @@ dependencies = [
  "ed25519-dalek",
  "env_logger",
  "form_urlencoded",
- "futures-test",
  "futures-util",
  "hex",
  "hex-literal",
@@ -1470,17 +1487,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92d699e522242e69e3003b94ecc1f960f3a5e015aa7c5d7486e65ad01dd94f5e"
 
 [[package]]
-name = "futures-executor"
-version = "0.3.34"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "031b47cf1a3c6cc8bc2fc76cd437f521619387907d469316e7c0bc278f1f5432"
-dependencies = [
- "futures-core",
- "futures-task",
- "futures-util",
-]
-
-[[package]]
 name = "futures-io"
 version = "0.3.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1521,22 +1527,6 @@ name = "futures-task"
 version = "0.3.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cd417de3d1d015fc3bfd2b1ea46dfc7bab72ef86f1cc7cc9c78e728b34a6d1fd"
-
-[[package]]
-name = "futures-test"
-version = "0.3.34"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4d0ceb932f7909033988f82e244109c50e5f3978ca031c576533dd3480a7605"
-dependencies = [
- "futures-core",
- "futures-executor",
- "futures-io",
- "futures-macro",
- "futures-sink",
- "futures-task",
- "futures-util",
- "pin-project",
-]
 
 [[package]]
 name = "futures-util"

@@ -50,7 +50,7 @@ See [the `examples` folder][examples] for some complete examples of items in thi
 - `Html`: (graduated 🎉) basic string wrapper that responds with HTML Content-Type [(docs)](https://docs.rs/actix-web/4/actix_web/web/struct.Html.html)
 - `Cbor`: basic CBOR format wrapper with appropriate Content-Type [(docs)](https://docs.rs/actix-web-lab/0.29.5/actix_web_lab/respond/struct.Cbor.html)
 - `MessagePack`: basic MessagePack format wrapper with appropriate Content-Type [(docs)](https://docs.rs/actix-web-lab/0.29.5/actix_web_lab/respond/struct.MessagePack.html)
-- `Sse`: semantic server-sent events (SSE) responder with a channel-like interface [(docs)](https://docs.rs/actix-web-lab/0.29.5/actix_web_lab/sse/index.html)
+- `Sse`: (graduated 🎉) semantic server-sent events (SSE) responder; use the [`actix-sse`](https://crates.io/crates/actix-sse) crate [(docs)](https://docs.rs/actix-sse)
 
 ### Middleware
 

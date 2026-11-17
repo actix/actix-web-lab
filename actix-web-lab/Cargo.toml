@@ -99,6 +99,7 @@ actix-files = { version = "0.7", optional = true }
 [dev-dependencies]
 actix-web-lab-derive = { path = "../actix-web-lab-derive" }
 
+actix-sse = "0.3"
 actix-web = { version = "4.15", features = ["rustls-0_23"] }
 async_zip = { version = "0.0.19", features = ["deflate", "tokio"] }
 base64 = "0.23"
@@ -107,7 +108,6 @@ digest = "0.11"
 divan = { package = "codspeed-divan-compat", version = "4" }
 ed25519-dalek = { version = "3", features = ["hazmat"] }
 env_logger = "0.11"
-futures-test = "0.3"
 futures-util = { version = "0.3.31", default-features = false, features = ["std", "io"] }
 hex = "0.4"
 hex-literal = "1"
@@ -137,10 +137,6 @@ required-features = ["spa"]
 
 [[bench]]
 name = "query"
-harness = false
-
-[[bench]]
-name = "sse"
 harness = false
 
 [lints]

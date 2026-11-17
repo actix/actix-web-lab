@@ -7,6 +7,7 @@
 - Fix `#[derive(FromRequest)]` when fields have unrelated attributes.
 - Fix `#[derive(FromRequest)]` for structs with one extractor field or only `#[from_request(copy_from_app_data)]` fields.
 - Emit compile errors for unknown or malformed `#[from_request(...)]` attributes.
+- Deprecate the `sse` module in favor of the [`actix-sse`](https://crates.io/crates/actix-sse) crate.
 
 ## 0.29.5
 

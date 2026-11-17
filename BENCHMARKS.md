@@ -8,18 +8,12 @@ With `cargo-codspeed` installed, run `just bench-build` and `just bench-run` to 
 
 ## Workloads
 
-- Actix SSE body: direct streams, prefilled channels, streams that insert `Pending` polls, and initial retry events. Cases vary message size and batch size.
+- Query extraction: parse a page number and repeated tags, including a percent-encoded value, into typed parameters.
 
-Each workload checks expected events or bytes before measurement. Body benchmarks also reject errors while consuming the measured output.
-
-Message size arguments specify payload bytes. Cases include 32 B, 1 KiB, and 64 KiB, plus 1,000 B and 60,000 B. Batch counts include one message, 16 messages, and 128 messages.
-
-Metadata adds more framing bytes in the Actix SSE cases. Use memory profiles to see which cases change allocation counts or sizes.
-
-Actix SSE body cases exclude input and channel setup. They measure body polling and encoding without collecting the response into another buffer.
+Each workload checks the parsed values before measurement and rejects parse errors while measuring.
 
 ## Interpreting results
 
-Use CPU profiles to locate work and memory profiles to assess allocation changes. Compare all affected cases: an improvement for large messages can increase the cost of small messages.
+Use CPU profiles to locate work and memory profiles to assess allocation changes.
 
 CPU simulation does not measure time spent in system calls. These workloads do not establish network latency, concurrent client throughput, or backpressure behavior. Use a representative walltime workload on a dedicated runner when those properties are the optimization target.
