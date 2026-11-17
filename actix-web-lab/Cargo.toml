@@ -136,6 +136,10 @@ name = "spa"
 required-features = ["spa"]
 
 [[bench]]
+name = "query"
+harness = false
+
+[[bench]]
 name = "sse"
 harness = false
 
