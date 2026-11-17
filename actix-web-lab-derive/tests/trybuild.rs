@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-// #[rustversion::stable(1.70)] // MSRV
+#[rustversion::stable(1.90)] // MSRV
 #[test]
 fn compile_macros() {
     let t = trybuild::TestCases::new();
