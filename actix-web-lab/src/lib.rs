@@ -79,6 +79,11 @@ pub mod guard;
 pub mod header;
 pub mod middleware;
 pub mod respond;
+// Unit tests inherit the deprecation and trigger warnings in the generated test harness.
+#[cfg_attr(
+    not(test),
+    deprecated(since = "0.29.6", note = "Use the `actix-sse` crate instead.")
+)]
 pub mod sse;
 pub mod test;
 pub mod util;

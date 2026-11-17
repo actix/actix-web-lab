@@ -1,5 +1,7 @@
 //! Semantic server-sent events (SSE) responder.
 //!
+//! This module is deprecated. Use the [`actix-sse`](https://docs.rs/actix-sse) crate instead.
+//!
 //! Message data and comments can contain multiple lines. CRLF and CR line endings are converted
 //! to LF. An ID with NUL, CR, or LF, or an event name with CR or LF, causes the response body to
 //! return an encoding error.

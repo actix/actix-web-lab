@@ -18,7 +18,7 @@ poll-results:
 # Validate benchmark outputs without collecting timings.
 [group("benchmark")]
 bench-test:
-    cargo bench -p actix-web-lab --bench query --bench sse --all-features --locked -- --test
+    cargo bench -p actix-web-lab --bench query --all-features --locked -- --test
 
 # Build benchmarks for CPU and memory reporting.
 [group("benchmark")]
