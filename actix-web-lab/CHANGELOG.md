@@ -4,6 +4,9 @@
 
 - Add `sse::Data::{retry, set_retry}` methods to set the connection's reconnection delay in individual data messages.
 - Deprecate `body::{new_infallible_body_stream, new_infallible_sized_stream}` in favor of the upstream `actix_web::body::{BodyStream, SizedStream}::from_infallible()` constructors.
+- Fix `#[derive(FromRequest)]` when fields have unrelated attributes.
+- Fix `#[derive(FromRequest)]` for structs with one extractor field or only `#[from_request(copy_from_app_data)]` fields.
+- Emit compile errors for unknown or malformed `#[from_request(...)]` attributes.
 
 ## 0.29.5
 
