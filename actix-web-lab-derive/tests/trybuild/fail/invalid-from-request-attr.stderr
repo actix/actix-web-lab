@@ -1,5 +1,5 @@
 error: invalid `from_request` attribute; expected `copy_from_app_data`
- --> tests/trybuild/err-invalid-from-request-attr.rs:6:5
+ --> tests/trybuild/fail/invalid-from-request-attr.rs:6:5
   |
 6 |     #[from_request(unknown_option)]
   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
