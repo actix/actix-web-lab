@@ -13,8 +13,12 @@ fn is_copy_from_app_data_attr(attr: &syn::Attribute) -> bool {
             .is_ok_and(|ident| ident == "copy_from_app_data")
 }
 
-fn is_copy_from_app_data(field: &syn::Field) -> bool {
-    field.attrs.iter().any(is_copy_from_app_data_attr)
+struct ParsedField<'a> {
+    ident: &'a Ident,
+    ty: &'a syn::Type,
+    val_var: Ident,
+    fut_var: Ident,
+    copy_from_app_data: bool,
 }
 
 /// Derive a `FromRequest` implementation for an aggregate struct extractor.
@@ -71,57 +75,72 @@ pub fn derive_from_request(input: proc_macro::TokenStream) -> proc_macro::TokenS
         }
     };
 
-    let field_names_joined = fields
-        .iter()
-        .map(|f| f.ident.clone().unwrap())
-        .collect::<Punctuated<_, Comma>>();
+    let mut parsed_fields = Vec::with_capacity(fields.len());
 
-    for field in &fields {
+    for (idx, field) in fields.iter().enumerate() {
+        let mut copy_from_app_data = false;
+
         for attr in &field.attrs {
-            if attr.path().is_ident("from_request") && !is_copy_from_app_data_attr(attr) {
-                return syn::Error::new_spanned(
-                    attr,
-                    "invalid `from_request` attribute; expected `copy_from_app_data`",
-                )
-                .to_compile_error()
-                .into();
+            if attr.path().is_ident("from_request") {
+                if !is_copy_from_app_data_attr(attr) {
+                    return syn::Error::new_spanned(
+                        attr,
+                        "invalid `from_request` attribute; expected `copy_from_app_data`",
+                    )
+                    .to_compile_error()
+                    .into();
+                }
+
+                copy_from_app_data = true;
             }
         }
+
+        parsed_fields.push(ParsedField {
+            ident: field.ident.as_ref().unwrap(),
+            ty: &field.ty,
+            val_var: format_ident!("__field_{idx}"),
+            fut_var: format_ident!("__fut_{idx}"),
+            copy_from_app_data,
+        });
     }
 
+    let field_inits = parsed_fields
+        .iter()
+        .map(|f| {
+            let ParsedField { ident, val_var, .. } = f;
+            quote! { #ident: #val_var }
+        })
+        .collect::<Punctuated<_, Comma>>();
+
     // i.e., field has no special handling, it's just extracted using its FromRequest impl
-    let fut_fields = fields.iter().filter(|field| !is_copy_from_app_data(field));
+    let fut_fields = parsed_fields.iter().filter(|f| !f.copy_from_app_data);
 
     let field_fut_names_joined = fut_fields
         .clone()
-        .map(|f| format_ident!("{}_fut", f.ident.clone().unwrap()))
+        .map(|f| &f.fut_var)
         .collect::<Punctuated<_, Comma>>();
 
     let field_post_fut_names_joined = fut_fields
         .clone()
-        .map(|f| f.ident.clone().unwrap())
+        .map(|f| &f.val_var)
         .collect::<Punctuated<_, Comma>>();
 
-    let field_futs = fut_fields.clone().map(|field| {
-        let syn::Field { ident, ty, .. } = field;
-
-        let varname = format_ident!("{}_fut", ident.clone().unwrap());
+    let field_futs = fut_fields.map(|f| {
+        let ParsedField { ty, fut_var, .. } = f;
 
         quote! {
-            let #varname = <#ty>::from_request(&req, pl).map_err(Into::into);
+            let #fut_var = <#ty>::from_request(&req, pl).map_err(Into::into);
         }
     });
 
-    let fields_copied_from_app_data = fields
+    let fields_copied_from_app_data = parsed_fields
         .iter()
-        .filter(|field| is_copy_from_app_data(field))
-        .map(|field| {
-            let syn::Field { ident, ty, .. } = field;
-
-            let varname = ident.clone().unwrap();
+        .filter(|f| f.copy_from_app_data)
+        .map(|f| {
+            let ParsedField { ty, val_var, .. } = f;
 
             quote! {
-                let #varname = if let Some(st) = req.app_data::<#ty>().copied() {
+                let #val_var = if let Some(st) = req.app_data::<#ty>().copied() {
                     st
                 } else {
                     ::actix_web_lab::__reexports::tracing::debug!(
@@ -146,14 +165,14 @@ pub fn derive_from_request(input: proc_macro::TokenStream) -> proc_macro::TokenS
     let body_fut = if field_post_fut_names_joined.is_empty() {
         quote! {
             ::std::boxed::Box::pin(async move {
-                ::std::result::Result::Ok(Self { #field_names_joined })
+                ::std::result::Result::Ok(Self { #field_inits })
             })
         }
     } else {
         quote! {
             ::std::boxed::Box::pin(
                 async move { try_join!( #field_fut_names_joined ) }
-                    .map_ok(move |( #field_post_fut_names_joined, )| Self { #field_names_joined })
+                    .map_ok(move |( #field_post_fut_names_joined, )| Self { #field_inits })
             )
         }
     };
