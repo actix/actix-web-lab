@@ -177,8 +177,35 @@ pub fn derive_from_request(input: proc_macro::TokenStream) -> proc_macro::TokenS
         }
     };
 
+    let mut generics = input.generics.clone();
+    if !input.generics.params.is_empty() {
+        let where_clause = generics.make_where_clause();
+
+        for param in input.generics.type_params() {
+            let ident = &param.ident;
+            where_clause
+                .predicates
+                .push(syn::parse_quote!(#ident: 'static));
+        }
+
+        for f in &parsed_fields {
+            let ty = f.ty;
+            if f.copy_from_app_data {
+                where_clause
+                    .predicates
+                    .push(syn::parse_quote!(#ty: ::std::marker::Copy));
+            } else {
+                where_clause
+                    .predicates
+                    .push(syn::parse_quote!(#ty: ::actix_web::FromRequest));
+            }
+        }
+    }
+
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
     let output = quote! {
-        impl ::actix_web::FromRequest for #name {
+        impl #impl_generics ::actix_web::FromRequest for #name #ty_generics #where_clause {
             type Error = ::actix_web::Error;
             type Future = ::std::pin::Pin<::std::boxed::Box<
                 dyn ::std::future::Future<Output = ::std::result::Result<Self, Self::Error>>
