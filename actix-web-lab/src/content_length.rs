@@ -22,7 +22,7 @@ use actix_web::{
 /// Content-Length = 1*DIGIT
 /// ```
 ///
-/// [RFC 9110 §8.6]: https://www.rfc-editor.org/rfc/rfc9110#name-content-length
+/// [RFC 9110 §8.6]: https://www.rfc-editor.org/info/rfc9110/#section-8.6
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ContentLength(usize);
 
