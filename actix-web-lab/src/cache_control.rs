@@ -61,7 +61,7 @@ use actix_http::{
 /// ]));
 /// ```
 ///
-/// [RFC 7234 §5.2]: https://datatracker.ietf.org/doc/html/rfc7234#section-5.2
+/// [RFC 7234 §5.2]: https://www.rfc-editor.org/info/rfc7234/#section-5.2
 /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CacheControl(pub Vec<CacheDirective>);

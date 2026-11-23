@@ -12,13 +12,13 @@ use actix_web::{
 use itertools::Itertools as _;
 
 // TODO: implement typed parsing of Node identifiers as per:
-// https://datatracker.ietf.org/doc/html/rfc7239#section-6
+// https://www.rfc-editor.org/info/rfc7239/#section-6
 
 /// The `Forwarded` header, defined in [RFC 7239].
 ///
 /// Also see the [Forwarded header's MDN docs][mdn] for field semantics.
 ///
-/// [RFC 7239]: https://datatracker.ietf.org/doc/html/rfc7239
+/// [RFC 7239]: https://www.rfc-editor.org/info/rfc7239
 /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(test, derive(Default))]
@@ -79,7 +79,7 @@ impl Forwarded {
         // > In a chain of proxy servers where this is fully utilized, the first
         // > "for" parameter will disclose the client where the request was first
         // > made, followed by any subsequent proxy identifiers.
-        // - https://datatracker.ietf.org/doc/html/rfc7239#section-5.2
+        // - https://www.rfc-editor.org/info/rfc7239/#section-5.2
         // ```
 
         self.r#for.first().map(String::as_str)
@@ -239,7 +239,7 @@ impl Header for Forwarded {
         }
 
         // pass to FromStr impl as if it were one concatenated header with semicolon joiners
-        // https://datatracker.ietf.org/doc/html/rfc7239#section-7.1
+        // https://www.rfc-editor.org/info/rfc7239/#section-7.1
         combined.join(";").parse().map_err(|_| ParseError::Header)
     }
 }
