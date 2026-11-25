@@ -94,11 +94,12 @@ impl<T: DeserializeOwned> Query<T> {
     /// assert!(numbers.get("three").is_none());
     /// ```
     pub fn from_query(query_str: &str) -> Result<Self, QueryDeserializeError> {
-        let make_deserializer =
-            || serde_html_form::Deserializer::new(form_urlencoded::parse(query_str.as_bytes()));
+        let bytes = query_str.as_bytes();
 
-        T::deserialize(make_deserializer())
-            .or_else(|_| serde_path_to_error::deserialize(make_deserializer()))
+        T::deserialize(serde_html_form::Deserializer::from_bytes(bytes))
+            .or_else(|_| {
+                serde_path_to_error::deserialize(serde_html_form::Deserializer::from_bytes(bytes))
+            })
             .map(Self)
             .map_err(|err| QueryDeserializeError {
                 path: err.path().clone(),
