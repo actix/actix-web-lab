@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.30.1
+
 - Expect faster extraction of valid input with `Json`, `Query`, and `UrlEncodedForm`. These extractors now track the error path only when deserialization fails. Invalid input can take longer because it is parsed twice.
 
 ## 0.30.0
