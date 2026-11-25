@@ -13,7 +13,7 @@ struct Params {
     tag: Vec<String>,
 }
 
-#[divan::bench]
+#[divan::bench(sample_size = 1)]
 fn parse_query(b: Bencher<'_, '_>) {
     let query = "page=2&tag=rust&tag=web%20development";
     let params = Query::<Params>::from_query(query).unwrap();
