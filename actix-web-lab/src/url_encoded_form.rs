@@ -530,13 +530,16 @@ mod tests {
             .insert_header(header::ContentType::form_url_encoded())
             .set_payload("b=invalid")
             .to_http_parts();
+
         let err =
             UrlEncodedFormBody::<Input, DEFAULT_URL_ENCODED_FORM_LIMIT>::new(&req, &mut payload)
                 .await
                 .unwrap_err();
+
         let UrlEncodedFormError::Deserialize { source } = err else {
             panic!()
         };
+
         assert_eq!(source.path().to_string(), "b");
         assert_eq!(
             source.to_string(),
