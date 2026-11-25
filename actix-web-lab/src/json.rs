@@ -29,7 +29,8 @@ pub const DEFAULT_JSON_LIMIT: usize = 2_097_152;
 ///
 /// Deserialization first runs without error-path tracking. On failure, it runs again
 /// over the same input to obtain a detailed error. Custom deserializers can run
-/// twice and must account for repeated side effects. A successful retry is accepted.
+/// twice and must account for repeated side effects. If the second attempt succeeds,
+/// the extractor returns its value and discards the first error.
 ///
 /// Use the `LIMIT` const generic parameter to control the payload size limit. The default limit
 /// that is exported (`DEFAULT_LIMIT`) is 2MiB.

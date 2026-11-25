@@ -23,7 +23,8 @@ use serde::de::DeserializeOwned;
 ///
 /// Deserialization first runs without error-path tracking. On failure, it runs again
 /// over the same input to obtain a detailed error. Custom deserializers can run
-/// twice and must account for repeated side effects. A successful retry is accepted.
+/// twice and must account for repeated side effects. If the second attempt succeeds,
+/// the extractor returns its value and discards the first error.
 ///
 /// # Panics
 /// A query string consists of unordered `key=value` pairs, therefore it cannot be decoded into any
