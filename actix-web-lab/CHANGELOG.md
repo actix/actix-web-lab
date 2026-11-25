@@ -10,6 +10,7 @@
 - Fix `#[derive(FromRequest)]` field name collisions with internal macro bindings.
 - Deprecate `body::{new_infallible_body_stream, new_infallible_sized_stream}` in favor of the upstream `actix_web::body::{BodyStream, SizedStream}::from_infallible()` constructors.
 - Deprecate the `sse` module in favor of the [`actix-sse`](https://crates.io/crates/actix-sse) crate.
+- Expect faster extraction of valid input with `Json`, `Query`, and `UrlEncodedForm`. These extractors now track the error path only when deserialization fails. Invalid input can take longer because it is parsed twice.
 
 ## 0.29.5
 
